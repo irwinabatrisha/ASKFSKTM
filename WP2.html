@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AskFSKTM – Weekly Progress 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9ECF8;--card:#FFFBF4;--line:#E6DCEB;--ink:#2E2650;--ink2:#5A5278;--ink3:#8D88A6;
+  --purple:#6B5BA8;--purple-d:#4B3F72;--lilac:#AC9FC8;--lilac-l:#ECE7F8;
+  --mint:#D6EFE2;--mint-d:#2F7D5B;--peach:#FBE1CD;--peach-d:#B4612A;--butter:#FCF0C6;--butter-d:#8E6B0E;--pink:#F8DCE7;--pink-d:#A93E6A;--red:#C2415B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);background:radial-gradient(circle at 20% 15%,#F4F1FC 0,var(--bg) 45%,#DDE2F4 100%)}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3,h4{font-family:'Fredoka',sans-serif;color:var(--purple-d);line-height:1.05}
+.stage{position:absolute;left:50%;width:1600px;height:900px;transform:translate(-50%,-50%) scale(var(--s,1))}
+.slide{position:absolute;inset:0;padding:60px 80px;border-radius:36px;overflow:hidden;
+ background:radial-gradient(circle at 93% 7%,rgba(172,159,200,.25) 0 140px,transparent 141px),radial-gradient(circle at 4% 96%,rgba(214,239,226,.6) 0 120px,transparent 121px),linear-gradient(160deg,#F7F5FD,#EEF0FA);
+ box-shadow:0 30px 80px rgba(75,63,114,.18);opacity:0;visibility:hidden;transform:translateY(24px) scale(.985);transition:opacity .45s,transform .45s,visibility 0s .45s}
+.slide.active{opacity:1;visibility:visible;transform:none;transition:opacity .45s,transform .45s}
+.kicker{font:800 20px 'Nunito';letter-spacing:3px;text-transform:uppercase;color:var(--purple)}
+h2{font-size:72px;font-weight:700;margin:6px 0 26px}
+h2 .soft{color:var(--lilac)}
+.chip{display:inline-block;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 18px;font:700 20px 'Nunito';color:var(--ink2)}
+.chip.dark{background:var(--purple-d);border-color:var(--purple-d);color:#fff}
+.hint{font:700 18px 'Nunito';color:var(--ink3);display:flex;align-items:center;gap:8px}
+.hint i{width:10px;height:10px;border-radius:50%;background:var(--purple);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+
+/* title */
+.title{height:100%;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:40px}
+.title h1{font-size:120px;font-weight:700;letter-spacing:-2px}
+.title h1 span{color:var(--lilac)}
+.title .sub{font:600 44px 'Fredoka';color:var(--ink2);margin:14px 0 30px}
+.title .meta{display:flex;gap:12px;flex-wrap:wrap}
+.spin{justify-self:center;position:relative;width:440px;height:440px}
+.spin svg{width:100%;height:100%;animation:rot 18s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.spin .mid{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font:700 44px 'Fredoka';color:var(--purple-d);line-height:1}
+.spin .mid small{display:block;font:800 18px 'Nunito';letter-spacing:3px;color:var(--purple);margin-top:10px}
+
+/* choice */
+.choice{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;margin-top:10px}
+.quote{font:600 40px 'Fredoka';color:var(--ink);line-height:1.25}
+.quote b{color:var(--purple)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.stat{background:var(--card);border:2px solid var(--line);border-radius:26px;padding:24px 26px}
+.stat .v{font:700 64px 'Fredoka';color:var(--purple-d);line-height:1}
+.stat .l{font:700 20px 'Nunito';color:var(--ink2);margin-top:8px}
+.roles{display:flex;gap:16px;margin-top:60px}
+.role{flex:1;border-radius:22px;padding:18px 22px}
+.role h4{font-size:26px;color:var(--ink)}
+.role p{font-size:19px;color:var(--ink2);margin-top:4px}
+
+/* methodology diagram */
+.dia{display:grid;grid-template-columns:1fr 430px;gap:30px;height:690px}
+.dia svg{width:100%;height:100%}
+.node{cursor:pointer;transition:transform .2s}
+.node:hover{transform:translateY(-3px)}
+.node rect{transition:stroke-width .2s}
+.node.on rect{stroke:var(--purple-d)!important;stroke-width:5}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:28px;padding:28px 30px;box-shadow:0 14px 30px rgba(75,63,114,.08);display:flex;flex-direction:column}
+.panel .tag{align-self:flex-start;font:800 16px 'Nunito';letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border-radius:999px;background:var(--lilac-l);color:var(--purple)}
+.panel h3{font-size:40px;margin:14px 0 12px;color:var(--ink)}
+.panel p{font-size:21px;line-height:1.45;color:var(--ink2)}
+.panel ul{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.panel li{font-size:20px;line-height:1.35;padding-left:30px;position:relative;color:var(--ink)}
+.panel li::before{content:'';position:absolute;left:0;top:7px;width:16px;height:16px;border-radius:5px;background:var(--mint);box-shadow:inset 0 0 0 3px var(--mint-d)}
+.panel .who{margin-top:auto;padding-top:14px;border-top:2px dashed var(--line);font:700 18px 'Nunito';color:var(--ink3)}
+.fade{animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* sprints */
+.tl{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;position:relative}
+.sp{border:2px solid var(--line);background:var(--card);border-radius:22px;padding:16px 20px;text-align:left;transition:.2s}
+.sp .w{font:800 15px 'Nunito';letter-spacing:2px;color:var(--ink3);text-transform:uppercase}
+.sp h4{font-size:30px;color:var(--ink);margin-top:4px}
+.sp p{font-size:17px;color:var(--ink2);margin-top:4px}
+.sp.on{background:var(--purple);border-color:var(--purple)}
+.sp.on .w,.sp.on h4,.sp.on p{color:#fff}
+.sbody{display:grid;grid-template-columns:420px 1fr;gap:30px;height:520px}
+.feat{background:var(--card);border:2px solid var(--line);border-radius:26px;padding:26px 28px}
+.feat h3{font-size:34px;color:var(--ink);margin-bottom:6px}
+.feat .goal{font-size:20px;color:var(--ink2);margin-bottom:16px}
+.feat ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+.feat li{font:700 21px 'Nunito';display:flex;gap:12px;align-items:flex-start}
+.feat li span{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:16px;color:#fff;background:var(--mint-d)}
+.feat .review{margin-top:18px;background:var(--pink);border-radius:16px;padding:12px 16px;font-size:18px;color:var(--ink)}
+.feat .review b{color:var(--pink-d)}
+/* mini app mock */
+.mock{background:#fff;border:2px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:0 20px 40px rgba(75,63,114,.12);display:flex;flex-direction:column}
+.mbar{height:58px;background:#fff;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 20px;font:700 22px 'Fredoka';color:var(--purple-d)}
+.mbar i{width:30px;height:30px;border-radius:9px;background:var(--purple)}
+.mbar span{color:var(--lilac)}
+.mbar em{margin-left:auto;font:800 14px 'Nunito';font-style:normal;background:var(--lilac-l);color:var(--purple);padding:5px 12px;border-radius:999px}
+.mbody{flex:1;padding:20px;background:#F6F5FB;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.mc{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 16px;animation:pop .4s both}
+.mc h5{font:700 20px 'Fredoka';color:var(--ink)}
+.mc p{font-size:16px;color:var(--ink2);margin-top:4px}
+.pills{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.pl{font:800 13px 'Nunito';padding:3px 10px;border-radius:999px}
+.bub{max-width:78%;padding:12px 15px;border-radius:16px;font-size:17px;line-height:1.4;animation:pop .4s both}
+.bub.u{align-self:flex-end;background:var(--lilac-l)}
+.bub.b{background:#fff;border:2px solid var(--line)}
+.bub small{display:block;font:800 12px 'Nunito';letter-spacing:1px;text-transform:uppercase;opacity:.6;margin-bottom:3px}
+.src{margin-top:8px;font:800 13px 'Nunito';color:var(--mint-d);background:var(--mint);border-radius:8px;padding:4px 8px;display:inline-block}
+.slots{display:flex;gap:8px;flex-wrap:wrap}
+.slot{border:2px solid var(--line);border-radius:10px;padding:8px 12px;font:700 15px 'Nunito';background:#fff}
+.slot.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+
+/* agile vs waterfall */
+.seg{display:inline-flex;background:var(--lilac-l);border-radius:999px;padding:6px;margin-bottom:20px}
+.seg button{border:0;background:transparent;padding:12px 26px;border-radius:999px;font:800 20px 'Nunito';color:var(--ink2)}
+.seg button.on{background:var(--purple);color:#fff}
+.cmp{display:grid;grid-template-columns:1fr 520px;gap:30px;height:600px}
+.viz{background:var(--card);border:2px solid var(--line);border-radius:28px;padding:20px;position:relative}
+.viz svg{width:100%;height:100%}
+.verdict{position:absolute;left:24px;right:24px;bottom:20px;border-radius:16px;padding:14px 18px;font:700 20px 'Nunito'}
+.reasons{display:flex;flex-direction:column;gap:12px}
+.rs{display:flex;gap:16px;align-items:flex-start;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px 18px;animation:pop .4s both}
+.rs .n{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font:700 22px 'Fredoka';color:#fff}
+.rs h4{font-size:23px;color:var(--ink)}
+.rs p{font-size:17px;color:var(--ink2);margin-top:2px;line-height:1.35}
+.wf rect,.wf text{transition:opacity .4s}
+
+/* thanks */
+.thanks{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.thanks h1{font-size:150px;font-weight:700}
+.thanks h1 span{color:var(--lilac)}
+.thanks .sub{font:600 38px 'Fredoka';color:var(--ink2);margin:10px 0 30px}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--purple);color:#fff;text-decoration:none;font:800 24px 'Nunito';padding:16px 28px;border-radius:18px;box-shadow:0 14px 30px rgba(107,91,168,.35)}
+
+/* ui */
+.ui{position:fixed;left:0;right:0;bottom:14px;display:flex;justify-content:center;align-items:center;gap:12px;z-index:5;pointer-events:none}
+.ui>*{pointer-events:auto}
+.nb{width:46px;height:46px;border-radius:50%;border:2px solid var(--line);background:rgba(255,251,244,.95);color:var(--purple-d);font:800 22px 'Nunito';display:grid;place-items:center;box-shadow:0 6px 16px rgba(75,63,114,.15)}
+.dots{display:flex;gap:8px;background:rgba(255,251,244,.95);border:2px solid var(--line);padding:10px 14px;border-radius:999px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--lilac-l);border:0}
+.dot.on{background:var(--purple);width:26px;border-radius:6px}
+.timer{position:fixed;top:14px;right:16px;z-index:5;background:var(--purple-d);color:#fff;font:800 20px 'Nunito';padding:8px 16px;border-radius:999px;display:none}
+.timer.show{display:block}.timer.over{background:var(--red)}
+.keys{position:fixed;top:14px;left:16px;z-index:5;font:700 13px 'Nunito';color:var(--ink2);opacity:.6}
+@media(max-width:700px){.keys{display:none}}
+</style>
+</head>
+<body>
+<div class="keys">← → navigate · F fullscreen · T 3-min timer</div>
+<div class="timer" id="timer">0:00</div>
+<div class="stage" id="stage">
+
+<!-- 1 TITLE -->
+<section class="slide active">
+ <div class="title">
+  <div>
+   <div class="chip" style="margin-bottom:24px">AskFSKTM · WIA2006 Occurrence 5</div>
+   <h1>How we'll <span>build it</span></h1>
+   <div class="sub">System Development Methodology</div>
+   <div class="meta"><span class="chip dark">Weekly Progress 2</span><span class="chip">Agile (Scrum)</span></div>
+  </div>
+  <div class="spin">
+   <svg viewBox="0 0 440 440" aria-hidden="true">
+    <circle cx="220" cy="220" r="180" fill="none" stroke="#DCD5EE" stroke-width="26"/>
+    <circle cx="220" cy="220" r="180" fill="none" stroke="#6B5BA8" stroke-width="26" stroke-dasharray="190 945" stroke-linecap="round"/>
+    <circle cx="220" cy="220" r="180" fill="none" stroke="#8CC9AA" stroke-width="26" stroke-dasharray="120 1015" stroke-dashoffset="-300" stroke-linecap="round"/>
+    <circle cx="220" cy="220" r="180" fill="none" stroke="#EDB78F" stroke-width="26" stroke-dasharray="120 1015" stroke-dashoffset="-560" stroke-linecap="round"/>
+    <circle cx="220" cy="220" r="180" fill="none" stroke="#E9A7C0" stroke-width="26" stroke-dasharray="120 1015" stroke-dashoffset="-820" stroke-linecap="round"/>
+   </svg>
+   <div class="mid"><div>Plan · Build<br>Review · Repeat<small>EVERY 2 WEEKS</small></div></div>
+  </div>
+ </div>
+</section>
+
+<!-- 2 CHOICE -->
+<section class="slide">
+ <div class="kicker">Our methodology</div>
+ <h2>We chose <span class="soft">Agile (Scrum)</span></h2>
+ <div class="choice">
+  <div class="quote">Instead of building everything at once, we build AskFSKTM in <b>short 2-week sprints</b>. Each sprint ends with a <b>working part</b> of the system that we demo and improve from feedback.</div>
+  <div class="stats">
+   <div class="stat"><div class="v" data-count="4">0</div><div class="l">sprints</div></div>
+   <div class="stat"><div class="v"><span data-count="2">0</span>wk</div><div class="l">per sprint</div></div>
+   <div class="stat"><div class="v" data-count="5">0</div><div class="l">phases</div></div>
+   <div class="stat"><div class="v" data-count="5">0</div><div class="l">team members</div></div>
+  </div>
+ </div>
+ <div class="roles">
+  <div class="role" style="background:var(--lilac-l)"><h4>Product Owner</h4><p>Owns the backlog and decides priorities</p></div>
+  <div class="role" style="background:var(--mint)"><h4>Scrum Master</h4><p>Runs sprint meetings and removes blockers</p></div>
+  <div class="role" style="background:var(--peach)"><h4>Development Team</h4><p>Designs, builds and tests each sprint</p></div>
+ </div>
+</section>
+
+<!-- 3 DIAGRAM -->
+<section class="slide">
+ <div class="row" style="display:flex;justify-content:space-between;align-items:flex-end">
+  <div><div class="kicker">Methodology diagram</div><h2 style="margin-bottom:14px">The <span class="soft">5 phases</span></h2></div>
+  <div class="hint" style="margin-bottom:22px"><i></i>Click any phase or sprint step</div>
+ </div>
+ <div class="dia">
+  <svg viewBox="0 0 1050 690" id="diaSvg">
+   <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6B5BA8"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9A93B5"/></marker>
+   </defs>
+   <g class="node" data-k="p1"><rect x="0" y="40" width="200" height="110" rx="20" fill="#ECE7F8" stroke="#AC9FC8" stroke-width="2"/><text x="100" y="80" text-anchor="middle" font-size="14" font-weight="800" fill="#6B5BA8" letter-spacing="2">PHASE 1</text><text x="100" y="114" text-anchor="middle" font-size="26" font-weight="800" fill="#2E2650" font-family="Fredoka">Planning</text></g>
+   <g class="node" data-k="p2"><rect x="0" y="210" width="200" height="110" rx="20" fill="#ECE7F8" stroke="#AC9FC8" stroke-width="2"/><text x="100" y="250" text-anchor="middle" font-size="14" font-weight="800" fill="#6B5BA8" letter-spacing="2">PHASE 2</text><text x="100" y="284" text-anchor="middle" font-size="26" font-weight="800" fill="#2E2650" font-family="Fredoka">Requirements</text></g>
+   <line x1="100" y1="152" x2="100" y2="204" stroke="#6B5BA8" stroke-width="4" marker-end="url(#ar)"/>
+   <path d="M202 265 C240 265 250 330 285 340" fill="none" stroke="#6B5BA8" stroke-width="4" marker-end="url(#ar)"/>
+
+   <rect x="285" y="10" width="520" height="560" rx="28" fill="#fff" stroke="#6B5BA8" stroke-width="3" stroke-dasharray="10 8"/>
+   <text x="545" y="44" text-anchor="middle" font-size="15" font-weight="800" fill="#6B5BA8" letter-spacing="2">PHASE 3 · SPRINT CYCLE ×4</text>
+   <circle cx="545" cy="300" r="170" fill="none" stroke="#E4DEF2" stroke-width="14"/>
+   <circle id="orb" cx="545" cy="130" r="13" fill="#6B5BA8"/>
+   <text x="545" y="292" text-anchor="middle" font-size="25" font-weight="800" fill="#4B3F72" font-family="Fredoka">Working</text>
+   <text x="545" y="322" text-anchor="middle" font-size="25" font-weight="800" fill="#4B3F72" font-family="Fredoka">increment</text>
+   <g font-size="20" font-weight="800" text-anchor="middle" font-family="Fredoka">
+    <g class="node" data-k="s1"><rect x="455" y="96" width="180" height="58" rx="16" fill="#6B5BA8" stroke="#6B5BA8"/><text x="545" y="132" fill="#fff">Sprint Planning</text></g>
+    <g class="node" data-k="s2"><rect x="640" y="180" width="150" height="58" rx="16" fill="#D6EFE2" stroke="#D6EFE2"/><text x="715" y="216" fill="#2E2650">Design</text></g>
+    <g class="node" data-k="s3"><rect x="640" y="362" width="150" height="58" rx="16" fill="#FBE1CD" stroke="#FBE1CD"/><text x="715" y="398" fill="#2E2650">Develop</text></g>
+    <g class="node" data-k="s4"><rect x="470" y="446" width="150" height="58" rx="16" fill="#FCF0C6" stroke="#FCF0C6"/><text x="545" y="482" fill="#2E2650">Test</text></g>
+    <g class="node" data-k="s5"><rect x="300" y="362" width="160" height="58" rx="16" fill="#F8DCE7" stroke="#F8DCE7"/><text x="380" y="398" fill="#2E2650">Sprint Review</text></g>
+    <g class="node" data-k="s6"><rect x="300" y="180" width="160" height="58" rx="16" fill="#ECE7F8" stroke="#ECE7F8"/><text x="380" y="216" fill="#2E2650">Retrospective</text></g>
+   </g>
+
+   <path d="M807 290 L850 290" stroke="#6B5BA8" stroke-width="4" marker-end="url(#ar)"/>
+   <g class="node" data-k="p4"><rect x="850" y="150" width="200" height="120" rx="20" fill="#D6EFE2" stroke="#8CC9AA" stroke-width="2"/><text x="950" y="190" text-anchor="middle" font-size="14" font-weight="800" fill="#2F7D5B" letter-spacing="2">PHASE 4</text><text x="950" y="224" text-anchor="middle" font-size="24" font-weight="800" fill="#2E2650" font-family="Fredoka">Testing &amp;</text><text x="950" y="252" text-anchor="middle" font-size="24" font-weight="800" fill="#2E2650" font-family="Fredoka">Deployment</text></g>
+   <line x1="950" y1="272" x2="950" y2="318" stroke="#6B5BA8" stroke-width="4" marker-end="url(#ar)"/>
+   <g class="node" data-k="p5"><rect x="850" y="322" width="200" height="120" rx="20" fill="#FBE1CD" stroke="#EDB78F" stroke-width="2"/><text x="950" y="362" text-anchor="middle" font-size="14" font-weight="800" fill="#B4612A" letter-spacing="2">PHASE 5</text><text x="950" y="396" text-anchor="middle" font-size="24" font-weight="800" fill="#2E2650" font-family="Fredoka">Review &amp;</text><text x="950" y="424" text-anchor="middle" font-size="24" font-weight="800" fill="#2E2650" font-family="Fredoka">Maintain</text></g>
+   <path d="M950 444 C950 660 100 680 100 324" fill="none" stroke="#9A93B5" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#ag)"/>
+   <text x="545" y="640" text-anchor="middle" font-size="19" font-weight="700" fill="#7E7799">feedback updates the product backlog</text>
+  </svg>
+  <div class="panel" id="panel"></div>
+ </div>
+</section>
+
+<!-- 4 SPRINTS -->
+<section class="slide">
+ <div style="display:flex;justify-content:space-between;align-items:flex-end">
+  <div><div class="kicker">Sprint plan</div><h2 style="margin-bottom:18px">What each sprint <span class="soft">delivers</span></h2></div>
+  <div class="hint" style="margin-bottom:24px"><i></i>Click a sprint</div>
+ </div>
+ <div class="tl" id="tl"></div>
+ <div class="sbody"><div class="feat" id="feat"></div><div class="mock"><div class="mbar"><i></i>Ask<span>FSKTM</span><em id="mtag">Sprint 1 build</em></div><div class="mbody" id="mbody"></div></div></div>
+</section>
+
+<!-- 5 WHY -->
+<section class="slide">
+ <div class="kicker">Why Agile?</div>
+ <h2 style="margin-bottom:16px">Agile vs <span class="soft">Waterfall</span></h2>
+ <div class="seg" id="seg"><button data-m="w">Waterfall</button><button data-m="a" class="on">Agile (our choice)</button></div>
+ <div class="cmp">
+  <div class="viz"><svg viewBox="0 0 900 470" id="viz"></svg><div class="verdict" id="verdict"></div></div>
+  <div class="reasons" id="reasons"></div>
+ </div>
+</section>
+
+<!-- 6 THANKS -->
+<section class="slide">
+ <div class="thanks">
+  <div class="chip" style="margin-bottom:20px">AskFSKTM · Smarter help. Better together.</div>
+  <h1>Thank <span>you!</span></h1>
+  <div class="sub">Agile lets us build, show and improve, every two weeks.</div>
+  <a class="cta" href="https://askfsktm.vercel.app" target="_blank" rel="noopener">▶ Try our clickable prototype</a>
+ </div>
+</section>
+
+</div>
+<div class="ui"><button class="nb" id="prev" aria-label="Previous">‹</button><div class="dots" id="dots"></div><button class="nb" id="next" aria-label="Next">›</button></div>
+
+<script>
+(function(){
+const stage=document.getElementById('stage'),slides=[...document.querySelectorAll('.slide')],dots=document.getElementById('dots');let cur=0;
+function fit(){const s=Math.min(innerWidth/1660,(innerHeight-70)/960);stage.style.setProperty('--s',s);stage.style.top=((innerHeight-70)/2+8)+'px';}
+addEventListener('resize',fit);fit();
+slides.forEach((_,i)=>{const d=document.createElement('button');d.className='dot';d.setAttribute('aria-label','Slide '+(i+1));d.onclick=()=>go(i);dots.appendChild(d);});
+function go(i){cur=Math.max(0,Math.min(slides.length-1,i));slides.forEach((s,j)=>s.classList.toggle('active',j===cur));[...dots.children].forEach((d,j)=>d.classList.toggle('on',j===cur));if(cur===1)count();}
+document.getElementById('prev').onclick=()=>go(cur-1);document.getElementById('next').onclick=()=>go(cur+1);
+const timer=document.getElementById('timer');let t0,tk;
+function tt(){if(tk){clearInterval(tk);tk=null;timer.classList.remove('show','over');return;}t0=Date.now();timer.classList.add('show');tk=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);timer.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');timer.classList.toggle('over',s>=180);},250);}
+addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+ if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1);}
+ else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1);}
+ else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}
+ else if(e.key==='t'||e.key==='T')tt();});
+let sx=null;addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)go(cur+(dx<0?1:-1));sx=null;});
+
+/* counters */
+function count(){document.querySelectorAll('[data-count]').forEach(el=>{const n=+el.dataset.count;let i=0;el.textContent='0';const t=setInterval(()=>{i++;el.textContent=i;if(i>=n)clearInterval(t);},120);});}
+
+/* orb travelling around the cycle */
+const orb=document.getElementById('orb');let ang=-Math.PI/2;
+(function loop(){ang+=0.012;orb.setAttribute('cx',545+170*Math.cos(ang));orb.setAttribute('cy',300+170*Math.sin(ang));requestAnimationFrame(loop);})();
+
+/* diagram panel */
+const D={
+ p1:{t:'Phase 1',h:'Planning',p:'We set the foundation for the project.',l:['Define scope: FCSIT students, lecturers & admin','Identify stakeholders and their needs','Assign Scrum roles to our 5 members','Set the timeline: 4 sprints × 2 weeks'],w:'Output: project plan & schedule'},
+ p2:{t:'Phase 2',h:'Requirements',p:'We find out what users really need.',l:['Survey students, interview lecturers','Study current process (email, WhatsApp, Teams)','Write user stories, e.g. "As a student, I want to ask anonymously…"','Prioritise them into a product backlog'],w:'Output: prioritised product backlog'},
+ s1:{t:'Phase 3 · Sprint',h:'Sprint Planning',p:'At the start of every sprint, the team picks the top backlog items to build in the next 2 weeks.',l:['Choose user stories for this sprint','Break them into tasks','Assign tasks to members'],w:'Output: sprint backlog'},
+ s2:{t:'Phase 3 · Sprint',h:'Design',p:'We design only what this sprint needs.',l:['Use case & activity diagrams','Database design (ERD)','UI wireframes in our lavender theme'],w:'Output: diagrams & screen designs'},
+ s3:{t:'Phase 3 · Sprint',h:'Develop',p:'We build the features chosen for this sprint.',l:['Code the web app screens','Connect the AI features (chatbot, summaries)','Daily stand-ups to track progress'],w:'Output: new working features'},
+ s4:{t:'Phase 3 · Sprint',h:'Test',p:'Every feature is tested before the sprint ends.',l:['Unit & functional testing','Check AI answers and duplicate detection','Fix bugs found'],w:'Output: tested increment'},
+ s5:{t:'Phase 3 · Sprint',h:'Sprint Review',p:'We demo the working increment, just like our weekly progress presentations.',l:['Show the new features to the lecturer & users','Collect feedback','Update the backlog with changes'],w:'Output: feedback & updated backlog'},
+ s6:{t:'Phase 3 · Sprint',h:'Retrospective',p:'The team reflects on how the sprint went.',l:['What went well?','What could be better?','Improve how we work next sprint'],w:'Then the next sprint begins'},
+ p4:{t:'Phase 4',h:'Testing & Deployment',p:'After all 4 sprints, we test the full system together.',l:['Integration testing across all features','User acceptance testing with real students & lecturers','Deploy the web app and prepare a user guide'],w:'Output: live AskFSKTM system'},
+ p5:{t:'Phase 5',h:'Review & Maintenance',p:'The system keeps improving after launch.',l:['Collect user feedback','Fix bugs and update content','Tune AI thresholds (duplicates, moderation)'],w:'Feedback goes back into the backlog'}
+};
+const panel=document.getElementById('panel');
+function show(k){const d=D[k];document.querySelectorAll('#diaSvg .node').forEach(n=>n.classList.toggle('on',n.dataset.k===k));
+ panel.innerHTML=`<div class="fade"><span class="tag">${d.t}</span><h3>${d.h}</h3><p>${d.p}</p><ul>${d.l.map(x=>`<li>${x}</li>`).join('')}</ul></div><div class="who fade">${d.w}</div>`;}
+document.querySelectorAll('#diaSvg .node').forEach(n=>n.addEventListener('click',()=>show(n.dataset.k)));show('p1');
+
+/* sprints */
+const SP=[
+ {w:'Weeks 1–2',h:'Sprint 1',s:'Core Q&A',goal:'Goal: students can ask and browse questions.',f:['Login & roles (student, lecturer, admin)','Course + General Q&A board','Ask form with course & lecturer dropdown','Anonymous posting'],r:'Show the Q&A board; get feedback on the ask form.',
+  m:()=>`<div class="mc"><div class="pills"><span class="pl" style="background:var(--lilac-l);color:var(--purple)">WIA2006</span><span class="pl" style="background:#EEECF3;color:var(--ink2)">Anonymous</span></div><h5>Is the use case diagram needed in the proposal?</h5><p>Waiting for lecturer · 9 students asked</p></div><div class="mc" style="animation-delay:.1s"><div class="pills"><span class="pl" style="background:var(--lilac-l);color:var(--purple)">General</span></div><h5>Where do I submit the LI approval form?</h5><p>Waiting for lecturer · 4 students asked</p></div><div class="mc" style="animation-delay:.2s"><div class="pills"><span class="pl" style="background:var(--lilac-l);color:var(--purple)">WIA2001</span></div><h5>Which Oracle version for the lab?</h5><p>Waiting for lecturer · 6 students asked</p></div>`},
+ {w:'Weeks 3–4',h:'Sprint 2',s:'AI chatbot',goal:'Goal: answer common questions instantly.',f:['AI chatbot using course & faculty documents','Shows the source of every answer','Escalate to a lecturer if not found','AI moderation of posts'],r:'Test chatbot answers with real questions.',
+  m:()=>`<div class="bub u">When is Assignment 2 due?</div><div class="bub b" style="animation-delay:.15s"><small>AI Assistant</small>Assignment 2 is due Week 9, Friday 11:59 pm.<br><span class="src">📄 WIA2006 Course Outline, p.3</span></div><div class="bub u" style="animation-delay:.3s">Can we use React for the prototype?</div><div class="bub b" style="animation-delay:.45s"><small>AI Assistant</small>I couldn't find this in official materials. Ask a lecturer?</div>`},
+ {w:'Weeks 5–6',h:'Sprint 3',s:'Smart replies',goal:'Goal: cut lecturer workload.',f:['Group duplicate questions','AI summary for each group','Reply once to every student','AI-drafted replies & pinned answers'],r:'Lecturers try replying to a group.',
+  m:()=>`<div class="mc" style="display:flex;gap:14px;align-items:center"><div style="flex:none;width:64px;height:64px;border-radius:16px;background:var(--lilac-l);display:grid;place-items:center;font:700 26px 'Fredoka';color:var(--purple-d)">14</div><div><h5>Can we change group members after Week 3?</h5><p>14 students · grouped by AI</p></div></div><div class="mc" style="background:var(--butter);border-color:#F2E2A6;animation-delay:.15s"><p style="color:var(--ink)"><b style="color:var(--butter-d)">✨ AI summary:</b> 14 students ask if members can change because someone dropped the course.</p></div><div class="mc" style="animation-delay:.3s"><p style="color:var(--ink)"><b>AI draft:</b> Yes, changes are allowed until Week 5 if a member dropped…</p><div style="margin-top:10px;display:flex;gap:8px"><span class="slot on">Reply to all 14</span><span class="slot">📌 Pin answer</span></div></div>`},
+ {w:'Weeks 7–8',h:'Sprint 4',s:'Meetings & admin',goal:'Goal: complete the system.',f:['Consultation slot booking','Lecturer-proposed meeting times','Admin panel & support tickets','Dashboards for all three roles'],r:'Full demo before final testing.',
+  m:()=>`<div class="mc"><h5>Book a consultation · Dr. Aina</h5><div class="slots" style="margin-top:10px"><span class="slot">Tue 2:00 pm</span><span class="slot on">Wed 10:00 am</span><span class="slot">Thu 3:00 pm</span></div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px"><div class="mc" style="animation-delay:.1s"><p>Chatbot answered</p><h5 style="font-size:30px">63%</h5></div><div class="mc" style="animation-delay:.2s"><p>Open tickets</p><h5 style="font-size:30px">3</h5></div><div class="mc" style="animation-delay:.3s"><p>Time saved</p><h5 style="font-size:30px">5.2h</h5></div></div>`}
+];
+const tl=document.getElementById('tl');
+tl.innerHTML=SP.map((s,i)=>`<button class="sp" data-i="${i}"><div class="w">${s.w}</div><h4>${s.h}</h4><p>${s.s}</p></button>`).join('');
+function sp(i){[...tl.children].forEach((b,j)=>b.classList.toggle('on',j===i));const s=SP[i];
+ document.getElementById('feat').innerHTML=`<div class="fade"><h3>${s.h}: ${s.s}</h3><div class="goal">${s.goal}</div><ul>${s.f.map(x=>`<li><span>✓</span>${x}</li>`).join('')}</ul><div class="review"><b>Sprint review:</b> ${s.r}</div></div>`;
+ document.getElementById('mtag').textContent=s.h+' build';document.getElementById('mbody').innerHTML=s.m();}
+tl.onclick=e=>{const b=e.target.closest('.sp');if(b)sp(+b.dataset.i);};sp(0);
+
+/* agile vs waterfall */
+const viz=document.getElementById('viz'),verdict=document.getElementById('verdict'),reasons=document.getElementById('reasons');
+const R=[
+ ['Requirements will change','AI features (chatbot, duplicate detection) need trying and tuning with feedback.','#6B5BA8'],
+ ['Weekly progress = sprint reviews','Our lecturer\'s feedback is built in every 2 weeks.','#2F7D5B'],
+ ['Working parts early','The core Q&A board works even if AI features take longer, so risk is lower.','#B4612A'],
+ ['Fits our team & semester','5 members, one semester: short sprints with clear roles.','#A93E6A'],
+ ['Users involved throughout','Students & lecturers test each sprint, so it fits real needs.','#8E6B0E']
+];
+const RW=[
+ ['Fixed requirements upfront','Hard to change once design starts.','#9A93B5'],
+ ['Testing only at the end','Problems with AI features found too late.','#9A93B5'],
+ ['Users see it at the very end','No early feedback from students or lecturers.','#9A93B5']
+];
+function mode(m){[...document.querySelectorAll('#seg button')].forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+ if(m==='w'){
+  const st=['Requirements','Design','Develop','Test','Deploy'],c=['#ECE7F8','#D6EFE2','#FBE1CD','#FCF0C6','#F8DCE7'];
+  viz.innerHTML=st.map((s,i)=>`<g style="animation:pop .4s ${i*0.12}s both"><rect x="${20+i*160}" y="${20+i*62}" width="190" height="56" rx="14" fill="${c[i]}"/><text x="${115+i*160}" y="${55+i*62}" text-anchor="middle" font-size="21" font-weight="800" fill="#2E2650" font-family="Fredoka">${s}</text>${i<4?`<path d="M${210+i*160} ${48+i*62} q30 0 30 34" fill="none" stroke="#9A93B5" stroke-width="3"/>`:''}</g>`).join('')+
+   `<g style="animation:pop .4s .8s both"><circle cx="575" cy="378" r="18" fill="#C2415B"/><text x="575" y="385" text-anchor="middle" font-size="20" font-weight="800" fill="#fff">!</text><text x="602" y="385" font-size="20" font-weight="800" fill="#C2415B">First feedback: week 14</text></g>`;
+  verdict.style.background='#F8DCE7';verdict.style.color='#7A2A4C';verdict.textContent='✗ One long pass: if the AI features don\'t work well, we only find out at the end.';
+  reasons.innerHTML=RW.map((r,i)=>`<div class="rs" style="animation-delay:${i*.08}s"><div class="n" style="background:${r[2]}">✗</div><div><h4>${r[0]}</h4><p>${r[1]}</p></div></div>`).join('');
+ } else {
+  const cx=[150,355,560,765];
+  viz.innerHTML=cx.map((x,i)=>`<g style="animation:pop .4s ${i*0.15}s both"><circle cx="${x}" cy="190" r="78" fill="none" stroke="${['#6B5BA8','#8CC9AA','#EDB78F','#E9A7C0'][i]}" stroke-width="14"/><text x="${x}" y="184" text-anchor="middle" font-size="24" font-weight="800" fill="#2E2650" font-family="Fredoka">Sprint ${i+1}</text><text x="${x}" y="212" text-anchor="middle" font-size="16" font-weight="700" fill="#5A5278">${['Q&A board','AI chatbot','Smart replies','Meetings'][i]}</text><circle cx="${x}" cy="305" r="14" fill="#2F7D5B"/><text x="${x}" y="311" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">✓</text><text x="${x}" y="343" text-anchor="middle" font-size="16" font-weight="800" fill="#2F7D5B">Feedback wk ${(i+1)*2}</text></g>`).join('')+
+   `<line x1="150" y1="305" x2="765" y2="305" stroke="#CFE8DB" stroke-width="4" stroke-dasharray="6 6"/>`;
+  verdict.style.background='#D6EFE2';verdict.style.color='#1F5C42';verdict.textContent='✓ Feedback every 2 weeks: problems are caught early and fixed in the next sprint.';
+  reasons.innerHTML=R.map((r,i)=>`<div class="rs" style="animation-delay:${i*.08}s"><div class="n" style="background:${r[2]}">${i+1}</div><div><h4>${r[0]}</h4><p>${r[1]}</p></div></div>`).join('');
+ }}
+document.getElementById('seg').onclick=e=>{const b=e.target.closest('button');if(b)mode(b.dataset.m);};mode('a');
+go(0);
+})();
+</script>
+</body>
+</html>
