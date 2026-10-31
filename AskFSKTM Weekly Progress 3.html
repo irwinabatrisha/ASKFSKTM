@@ -1,0 +1,866 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>AskFSKTM Weekly Progress 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  /* Concept: a university service desk. Every slide is a counter window; queue tickets, routing lines and status steps carry the story. */
+  --bg:#EDF0F7; --surface:#FFFFFF; --surface-2:#F4F6FB; --ink:#0C1433; --muted:#566086; --line:#D2D9EA;
+  --accent:#2A36F0; --on-accent:#FFFFFF; --accent-soft:#E3E6FF;
+  --good:#087A63; --on-good:#FFFFFF; --good-soft:#D8F2EB;
+  --plum:#7A32C4; --on-plum:#FFFFFF;
+  --alert:#C73A16; --alert-soft:#FFE5DD; --warn:#8A5F00;
+  --shadow:0 1px 0 rgba(12,20,51,.05),0 18px 36px -18px rgba(12,20,51,.28);
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'Hanken Grotesk','Segoe UI',system-ui,sans-serif;
+  --f-mono:'DM Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A0F24; --surface:#121936; --surface-2:#0E1530; --ink:#E9EDFF; --muted:#98A3CC; --line:#263057;
+    --accent:#8E98FF; --on-accent:#0A0F24; --accent-soft:#1D2563;
+    --good:#35D6B4; --on-good:#06201A; --good-soft:#0E3A33;
+    --plum:#BE93FF; --on-plum:#1B0B33;
+    --alert:#FF7F5C; --alert-soft:#3B1D17; --warn:#E5B13A;
+    --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 40px -16px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A0F24; --surface:#121936; --surface-2:#0E1530; --ink:#E9EDFF; --muted:#98A3CC; --line:#263057;
+  --accent:#8E98FF; --on-accent:#0A0F24; --accent-soft:#1D2563;
+  --good:#35D6B4; --on-good:#06201A; --good-soft:#0E3A33;
+  --plum:#BE93FF; --on-plum:#1B0B33;
+  --alert:#FF7F5C; --alert-soft:#3B1D17; --warn:#E5B13A;
+  --shadow:0 1px 0 rgba(255,255,255,.03),0 18px 40px -16px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{font-size:clamp(15px,.85vw + 8px,23px)}
+html,body{height:100%}
+body{margin:0;font:400 1rem/1.5 var(--f-body);background:var(--bg);color:var(--ink);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:.6rem;padding-block:.75rem}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.55rem;font:800 1.1rem/1 var(--f-display);letter-spacing:-.01em}
+.brand svg{width:1.6rem;height:1.6rem;flex:none}
+.brand em{font-style:normal;color:var(--accent)}
+.brand small{font:500 .68rem var(--f-mono);letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-left:.4rem}
+.tools{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.tbtn{font:500 .7rem/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;background:var(--surface);border:1px solid var(--line);border-radius:.3rem;padding:.5rem .65rem;cursor:pointer;display:inline-flex;gap:.45rem;align-items:center}
+.tbtn:hover{border-color:var(--accent)}
+.tbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tbtn kbd{font:inherit;opacity:.55}
+.tbtn b{font-weight:500;font-variant-numeric:tabular-nums}
+.tbtn.over{border-color:var(--alert);color:var(--alert)}
+
+/* deck */
+.deck{position:relative;overflow:hidden;min-height:0}
+.slide{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;opacity:0;visibility:hidden;transform:translateX(28px);
+  transition:opacity .45s ease,transform .45s ease,visibility 0s .45s;padding-block:.25rem}
+.slide.is-past{transform:translateX(-28px)}
+.slide.is-active{opacity:1;visibility:visible;transform:none;transition:opacity .45s ease,transform .45s ease,visibility 0s}
+.in{max-width:76rem;margin:0 auto;min-height:100%;display:grid;align-content:center;gap:1.2rem;padding-block:.5rem}
+.rv{min-width:0}
+.is-active .rv{animation:rv .6s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*70ms)}
+@keyframes rv{from{transform:translateY(14px)}to{transform:none}}
+
+.eyebrow{font:500 .72rem/1.2 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0}
+h1,h2,h3,p{margin:0}
+h2{font:800 clamp(1.55rem,3vw,2.7rem)/1.05 var(--f-display);letter-spacing:-.02em;text-wrap:balance}
+.lede{font-size:clamp(1rem,1.5vw,1.3rem);color:var(--muted);max-width:42rem;text-wrap:pretty}
+.head{display:grid;gap:.5rem}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:.3rem;padding:1rem;min-width:0}
+.lbl{font:500 .7rem/1.2 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.5rem}
+.btn{font:600 .85rem/1 var(--f-body);background:var(--surface);border:1px solid var(--line);border-radius:.3rem;padding:.65rem .9rem;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.on{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.pill{font:500 .62rem/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:.25rem .45rem;border-radius:.2rem;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.urgent{background:var(--alert-soft);color:var(--alert);border-color:var(--alert)}
+.pill.high{color:var(--warn);border-color:var(--warn)}
+.pill.st-approved{background:var(--good-soft);color:var(--good);border-color:var(--good)}
+.pill.st-replied{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+
+/* 1 intro */
+.intro{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:2rem;align-items:center}
+.logo{font:800 clamp(3.2rem,10.5vw,9rem)/.9 var(--f-display);letter-spacing:-.045em}
+.logo span{color:var(--accent)}
+.intro-copy{display:grid;gap:1.1rem}
+.meta{display:flex;flex-wrap:wrap;gap:.8rem 2rem;margin:.4rem 0 0}
+.meta div{display:grid;gap:.15rem}
+.meta dt{font:500 .68rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.meta dd{margin:0;font:600 1.2rem/1.2 var(--f-display)}
+.edit{display:inline-block;min-width:3.2ch;border-bottom:2px dashed var(--accent);padding:0 .35rem;outline:none;cursor:text}
+.edit:empty::before{content:attr(data-ph);color:var(--muted)}
+.edit:focus{background:var(--accent-soft)}
+
+.ticket{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:.3rem;box-shadow:var(--shadow);padding:1.1rem 1.2rem 1.2rem;max-width:26rem;width:100%;margin-inline:auto;transform:rotate(1.6deg)}
+.ticket.q{transform:rotate(-1.6deg)}
+.ticket-top{display:flex;justify-content:space-between;gap:1rem;font:500 .68rem var(--f-mono);letter-spacing:.12em;color:var(--muted)}
+.live i{display:inline-block;width:.5rem;height:.5rem;border-radius:50%;background:var(--good);margin-right:.35rem;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.3}}
+.serving small{display:block;font:500 .68rem var(--f-mono);letter-spacing:.22em;color:var(--muted);margin-top:1rem}
+.serving b{display:block;font:800 clamp(3rem,7vw,5.2rem)/1 var(--f-display);letter-spacing:-.04em;color:var(--accent)}
+.serving b.flip{animation:flip .5s cubic-bezier(.2,.7,.2,1)}
+@keyframes flip{from{transform:translateY(40%)}to{transform:none}}
+.ticket-rule{position:relative;margin:1rem -1.2rem;border-top:2px dashed var(--line)}
+.ticket-rule::before,.ticket-rule::after{content:"";position:absolute;top:-.7rem;width:1.4rem;height:1.4rem;border-radius:50%;background:var(--bg)}
+.ticket-rule::before{left:-.7rem}.ticket-rule::after{right:-.7rem}
+.ticket-lines{list-style:none;margin:0;padding:0}
+.ticket-lines li{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;font-size:.85rem;border-bottom:1px dotted var(--line)}
+.ticket-lines li:last-child{border-bottom:0}
+.ticket-lines em{font:500 .68rem var(--f-mono);font-style:normal;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.ticket-lines em.u{color:var(--alert)}
+
+/* 2 today */
+.two{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:1.8rem;align-items:center}
+.pains{display:grid;gap:0;margin-top:.4rem}
+.pain{padding:.8rem 0;border-top:1px solid var(--line)}
+.pain b{display:block;font:700 1.05rem var(--f-display)}
+.pain span{color:var(--muted);font-size:.92rem}
+.sim{display:grid;gap:.7rem}
+.lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.lane{padding:.7rem}
+.lane h3{font:500 .68rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.feed{list-style:none;margin:0;padding:0;height:15.5rem;overflow:hidden;display:flex;flex-direction:column;gap:.4rem;-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}
+.msg{background:var(--surface-2);border:1px solid var(--line);border-radius:.25rem;padding:.45rem .55rem;display:grid;gap:.1rem;flex:none;animation:drop .35s ease-out}
+@keyframes drop{from{transform:translateY(-10px)}to{transform:none}}
+.msg b{font-size:.72rem;color:var(--muted);font-weight:600}
+.msg span{font-size:.82rem;line-height:1.3}
+.msg.urgent{background:var(--alert-soft);border-color:var(--alert)}
+.msg .tag{font:500 .6rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--alert);font-style:normal;margin-top:.15rem}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;align-items:stretch}
+.stat{padding:.6rem .8rem;display:grid;gap:.1rem}
+.stat b{font:800 clamp(1.5rem,2.6vw,2.2rem)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.stat small{font:500 .64rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat.hot{border-color:var(--alert)}.stat.hot b{color:var(--alert)}
+.stat button{justify-self:start}
+.simbar{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap}
+.simbar p{font-size:.85rem;color:var(--muted)}
+
+/* 3 solution */
+.tri{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem;align-items:stretch}
+textarea{width:100%;font:500 1.05rem/1.4 var(--f-body);background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:.3rem;padding:.7rem .8rem;resize:vertical}
+textarea:focus{border-color:var(--accent);outline:none}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.6rem 0}
+.chip{font:500 .7rem/1.2 var(--f-mono);background:var(--surface-2);border:1px solid var(--line);border-radius:.2rem;padding:.4rem .55rem;cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--accent)}
+.chip.u{color:var(--alert)}
+.suggest{display:grid;gap:.5rem;min-height:5.6rem}
+.hint{font-size:.9rem;color:var(--muted)}
+.sg{display:flex;justify-content:space-between;align-items:center;gap:.8rem;padding:.6rem .7rem;border:1px solid var(--accent);background:var(--accent-soft);border-radius:.25rem}
+.sg b{display:block;font-size:.95rem;line-height:1.25}
+.sg small{font:500 .64rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sendrow{display:flex;justify-content:space-between;align-items:center;gap:.8rem;margin-top:.8rem;min-height:2.4rem}
+.flag{font:500 .66rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--alert);background:var(--alert-soft);border:1px solid var(--alert);padding:.3rem .5rem;border-radius:.2rem}
+.route svg{width:100%;height:auto;display:block}
+.node{fill:var(--surface-2);stroke:var(--line);stroke-width:1.5;transition:stroke .3s}
+.node.on{stroke:var(--accent);stroke-width:2.5}
+.node.on.urg{stroke:var(--alert)}
+.t{font:800 17px var(--f-display);fill:var(--ink)}
+.s{font:500 12px var(--f-mono);fill:var(--muted);letter-spacing:.04em}
+.link{fill:none;stroke:var(--line);stroke-width:2.5}
+.link.on{stroke:var(--accent);stroke-dasharray:7 7;animation:dash .7s linear infinite}
+.link.on.urg{stroke:var(--alert)}
+@keyframes dash{to{stroke-dashoffset:-14}}
+.result{margin-top:.6rem;padding:.7rem .8rem;border:1px dashed var(--line);border-radius:.25rem;font-size:.92rem;color:var(--muted);min-height:3.4rem}
+.result b{color:var(--ink);font-family:var(--f-mono);font-weight:500}
+.result.ok{border-style:solid;border-color:var(--accent);color:var(--ink)}
+.result.ok.urg{border-color:var(--alert)}
+
+/* 4 roles */
+.tabs{display:flex;gap:.4rem}
+.tab{font:600 .85rem var(--f-display);background:var(--surface);border:1px solid var(--line);border-radius:.3rem;padding:.55rem .9rem;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rolepane{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:1rem;align-items:start}
+.rolepane[hidden]{display:none}
+.lhead{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem}
+.lhead label{font-size:.85rem;display:flex;gap:.4rem;align-items:center;cursor:pointer}
+.lrows{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
+.lrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:.6rem;align-items:center;padding:.55rem .6rem;border:1px solid var(--line);border-radius:.25rem;background:var(--surface-2);cursor:pointer}
+.lrow.sel{border-color:var(--accent);background:var(--accent-soft)}
+.lrow.done{opacity:.75}
+.lt b{display:block;font-size:.92rem;line-height:1.25}
+.lt small{color:var(--muted);font-size:.78rem}
+.draftmeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem}
+.draftmeta b{font:700 1rem var(--f-display)}
+.aitag{font:500 .62rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.stepper{list-style:none;margin:.3rem 0 1rem;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.stepper li{position:relative;text-align:center;font-size:.8rem;color:var(--muted);padding-top:2rem}
+.stepper li::before{content:"";position:absolute;top:.62rem;left:-50%;width:100%;height:3px;background:var(--line)}
+.stepper li:first-child::before{display:none}
+.stepper li::after{content:"";position:absolute;top:0;left:calc(50% - .65rem);width:1.3rem;height:1.3rem;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
+.stepper li.done{color:var(--ink)}
+.stepper li.done::before{background:var(--good)}
+.stepper li.done::after{background:var(--good);border-color:var(--good)}
+.stepper li.now{color:var(--ink);font-weight:700}
+.stepper li.now::before{background:var(--good)}
+.stepper li.now::after{border-color:var(--accent);box-shadow:0 0 0 5px var(--accent-soft)}
+.audit{list-style:none;margin:0;padding:0;display:grid;gap:.4rem;font-size:.88rem}
+.audit li{display:flex;gap:.6rem;align-items:baseline}
+.audit li::before{content:"";flex:none;width:.5rem;height:.5rem;border-radius:50%;background:var(--good);transform:translateY(-.05rem)}
+.note{font-size:.85rem;color:var(--muted)}
+
+/* 5 schedule */
+.gantt{position:relative;padding:1.6rem 0 1.8rem}
+.axis{position:absolute;left:0;right:0;top:0;height:1.2rem;font:500 .68rem var(--f-mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.axis span{position:absolute;transform:translateX(-50%)}
+.grid{position:absolute;left:0;right:0;top:1.4rem;bottom:0;pointer-events:none}
+.grid i{position:absolute;top:0;bottom:0;border-left:1px dashed var(--line)}
+.prow{position:relative;margin-top:.9rem}
+.prow .cap{font:700 .88rem var(--f-display);margin-bottom:.3rem;display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.prow .cap small{font:500 .66rem var(--f-mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.track{position:relative;height:2.5rem}
+.bar{position:absolute;top:0;height:100%;border:0;border-radius:.25rem;background:var(--bar);color:var(--on-bar);font:500 .74rem var(--f-mono);letter-spacing:.04em;display:flex;align-items:center;padding:0 .6rem;cursor:pointer;white-space:nowrap;overflow:hidden;opacity:.55;transition:opacity .2s,transform .2s}
+.bar:hover{opacity:.8}
+.bar.sel{opacity:1;box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--bar)}
+.bar.fade{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%)}
+.today{position:absolute;top:1.3rem;bottom:.2rem;border-left:2px solid var(--alert);pointer-events:none}
+.today b{position:absolute;bottom:-1.5rem;left:0;transform:translateX(-50%);font:500 .62rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--on-accent);background:var(--alert);padding:.2rem .4rem;border-radius:.2rem}
+:root[data-theme="dark"] .today b{color:#240B04}
+.mrow{position:relative;height:2rem;margin-top:.7rem}
+.dia{position:absolute;top:50%;width:.9rem;height:.9rem;background:var(--ink);transform:translate(-50%,-50%) rotate(45deg)}
+.mlab{position:absolute;top:50%;transform:translateY(-50%);font:500 .72rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:1rem;align-items:start}
+.detail h3{font:800 1.3rem/1.15 var(--f-display)}
+.detail .when{font:500 .72rem var(--f-mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:.3rem}
+.dels{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.45rem}
+.dels li{border:1px solid var(--line);background:var(--surface-2);padding:.5rem .7rem;border-radius:.25rem;font-weight:600;font-size:.92rem}
+
+/* 6 budget */
+.bud{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:2rem;align-items:center}
+.big{font:800 clamp(3.2rem,9vw,7.5rem)/.95 var(--f-display);letter-spacing:-.045em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.big small{font-size:.38em;letter-spacing:0;color:var(--muted);margin-right:.12em;font-weight:600}
+.sbar{display:flex;gap:3px;height:4rem;margin-bottom:.8rem}
+.seg{flex:var(--w) 1 0;min-width:.9rem;border:0;border-radius:.25rem;background:var(--c);opacity:.5;cursor:pointer;transition:opacity .2s}
+.seg:hover{opacity:.8}.seg.sel{opacity:1}
+.brows{display:grid;gap:.4rem}
+.brow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.15rem .8rem;align-items:center;padding:.7rem .9rem;border:1px solid var(--line);background:var(--surface);border-radius:.25rem;cursor:pointer;text-align:left;width:100%}
+.brow.sel{border-color:var(--ink)}
+.brow i{width:.8rem;height:.8rem;border-radius:.15rem;background:var(--c);grid-row:1/3}
+.brow b{font-weight:700}
+.brow .amt{font:500 .95rem var(--f-mono);font-variant-numeric:tabular-nums}
+.brow small{grid-column:2/4;color:var(--muted);font-size:.84rem;line-height:1.3}
+
+/* 7 thanks */
+.end{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:2rem;align-items:center}
+.end h2{font-size:clamp(2rem,5vw,4.4rem);line-height:1}
+.recap{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.4rem}
+.recap span{font:500 .72rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);background:var(--surface);padding:.45rem .6rem;border-radius:.2rem}
+
+/* notes */
+.notes{position:absolute;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border:1px solid var(--ink);border-radius:.3rem;box-shadow:var(--shadow);padding:.8rem 1rem 1rem;max-height:46%;overflow:auto}
+.notes header{display:flex;justify-content:space-between;align-items:center;gap:.8rem;margin-bottom:.4rem;font:500 .68rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.notes p{font-size:clamp(1rem,1.3vw,1.25rem);line-height:1.6;max-width:62rem}
+.notes .gn{border-bottom:2px dashed var(--accent)}
+#pace{color:var(--accent)}
+
+/* bottom nav */
+.bar-nav{display:flex;align-items:center;gap:.7rem}
+.nbtn{width:2.4rem;height:2.4rem;flex:none;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);border-radius:.3rem;cursor:pointer}
+.nbtn:hover:not(:disabled){border-color:var(--accent)}
+.nbtn:disabled{opacity:.35;cursor:default}
+.nbtn svg{width:1rem;height:1rem;stroke:currentColor;fill:none;stroke-width:2}
+.steps{flex:1;min-width:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:.4rem}
+.step{background:none;border:0;padding:.5rem 0 .1rem;text-align:left;cursor:pointer;color:var(--muted);font:500 .66rem var(--f-mono);letter-spacing:.07em;text-transform:uppercase;min-width:0}
+.step::before{content:"";display:block;height:4px;background:var(--line);margin-bottom:.4rem;border-radius:2px}
+.step.done::before{background:var(--accent);opacity:.4}
+.step.on::before{background:var(--accent)}
+.step.on{color:var(--ink)}
+.step span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+@media (max-width:860px){
+  .intro,.two,.tri,.rolepane,.detail,.bud,.end{grid-template-columns:minmax(0,1fr)}
+  .in{align-content:start}
+  .ticket{max-width:22rem}
+}
+@media (max-width:640px){
+  .step span,.brand small,.tbtn kbd{display:none}
+  .feed{height:7.5rem}
+  .lanes{grid-template-columns:minmax(0,1fr)}
+  .lrow{grid-template-columns:auto minmax(0,1fr) auto}
+  .lrow .st{display:none}
+  .stepper li{font-size:.7rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 7h26v6a3 3 0 0 0 0 6v6H3v-6a3 3 0 0 0 0-6z" fill="var(--accent)"/><path d="M12 12v8M16 12v8M20 12v8" stroke="var(--on-accent)" stroke-width="2" stroke-linecap="round"/></svg>
+      <div>Ask<em>FSKTM</em><small>Weekly Progress 3</small></div>
+    </div>
+    <div class="tools">
+      <button class="tbtn" id="timerBtn" aria-pressed="false" title="Start or pause the 2:30 timer (T)">Timer <b id="tm">0:00</b><kbd>T</kbd></button>
+      <button class="tbtn" id="tmReset" hidden title="Reset timer">Reset</button>
+      <button class="tbtn" id="notesBtn" aria-pressed="false" title="Show the speech script (N)">Script <kbd>N</kbd></button>
+      <button class="tbtn" id="themeBtn" title="Switch light or dark">Theme</button>
+      <button class="tbtn" id="fsBtn" title="Fullscreen (F)">Full <kbd>F</kbd></button>
+    </div>
+  </header>
+
+  <main class="deck" id="deck">
+
+    <!-- 1 intro -->
+    <section class="slide" id="s-intro" data-slug="intro" data-name="Intro" aria-label="Introduction">
+      <div class="in">
+        <div class="intro">
+          <div class="intro-copy">
+            <p class="eyebrow rv">Weekly Progress 3 · Proposed system</p>
+            <h1 class="logo rv"><span>Ask</span>FSKTM</h1>
+            <p class="lede rv">A smart digital front desk where students get answers faster and lecturers stop answering the same question twice.</p>
+            <dl class="meta rv">
+              <div><dt>Presenting to</dt><dd>Dr. Tutut</dd></div>
+              <div><dt>Group</dt><dd><span class="edit" id="groupNo" contenteditable="true" spellcheck="false" role="textbox" aria-label="Group number, click to edit" data-ph="No."></span></dd></div>
+              <div><dt>Team</dt><dd>5 members</dd></div>
+            </dl>
+          </div>
+          <div class="rv">
+            <div class="ticket" aria-hidden="true">
+              <div class="ticket-top"><span>FSKTM · Q&amp;A DESK</span><span class="live"><i></i>OPEN</span></div>
+              <div class="serving"><small>NOW SERVING</small><b id="tkNum">A-041</b></div>
+              <div class="ticket-rule"></div>
+              <ul class="ticket-lines">
+                <li><span>Same question as thread</span><em>Join thread</em></li>
+                <li><span>Deadline extension, MC</span><em class="u">To lecturer</em></li>
+                <li><span>Where are the slides?</span><em>To tutor</em></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 today -->
+    <section class="slide" id="s-today" data-slug="today" data-name="Today" aria-label="Current situation">
+      <div class="in">
+        <div class="two">
+          <div class="head">
+            <p class="eyebrow rv">Current situation</p>
+            <h2 class="rv">Questions arrive everywhere. Nothing is sorted.</h2>
+            <div class="pains rv">
+              <div class="pain"><b>Scattered channels</b><span>Email, Teams and WhatsApp, with no categories.</span></div>
+              <div class="pain"><b>The same questions, again</b><span>Lecturers answer identical questions one by one.</span></div>
+              <div class="pain"><b>Urgent requests get buried</b><span>Extensions and MC submissions have no audit trail and no status.</span></div>
+            </div>
+          </div>
+          <div class="sim rv">
+            <div class="lanes">
+              <div class="panel lane"><h3>Email</h3><ol class="feed" id="feed-email" aria-label="Email messages"></ol></div>
+              <div class="panel lane"><h3>Teams</h3><ol class="feed" id="feed-teams" aria-label="Teams messages"></ol></div>
+              <div class="panel lane"><h3>WhatsApp</h3><ol class="feed" id="feed-whatsapp" aria-label="WhatsApp messages"></ol></div>
+            </div>
+            <div class="stats">
+              <div class="panel stat"><b id="cMsg">0</b><small>Messages</small></div>
+              <div class="panel stat"><b id="cRep">0</b><small>Repeat questions</small></div>
+              <div class="panel stat" id="cUrgBox"><b id="cUrg">0</b><small>Urgent, no status</small></div>
+            </div>
+            <div class="simbar"><p>Example week of messages, simulated.</p><button class="btn" id="replayFlood">Replay</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 solution -->
+    <section class="slide" id="s-solution" data-slug="solution" data-name="Front desk" aria-label="Proposed solution">
+      <div class="in">
+        <div class="head">
+          <p class="eyebrow rv">Future situation</p>
+          <h2 class="rv">A smart front desk checks every question before it is sent.</h2>
+        </div>
+        <div class="tri rv">
+          <div class="panel">
+            <label class="lbl" for="q">A student starts a question</label>
+            <textarea id="q" rows="3">When is the assignment deadline?</textarea>
+            <div class="chips" id="chips">
+              <button class="chip" data-t="Where can I find the lecture slides?">Lecture slides</button>
+              <button class="chip u" data-t="I need a deadline extension, my MC is attached">Extension + MC</button>
+              <button class="chip" data-t="How is the final project graded?">Final project</button>
+            </div>
+            <div class="suggest" id="suggest" aria-live="polite"></div>
+            <div class="sendrow"><span class="flag" id="urgentFlag" hidden>Urgent keywords found</span><button class="btn primary" id="sendQ">Send question</button></div>
+          </div>
+          <div class="panel route">
+            <span class="lbl">Where it goes</span>
+            <svg viewBox="0 0 520 300" role="img" aria-label="Routing: student to AI check, then standard questions to tutors and urgent requests to the lecturer dashboard">
+              <path class="link" id="linkSA" d="M100 150H150"/>
+              <path class="link" id="linkAT" d="M280 150C312 150 308 66 340 66"/>
+              <path class="link" id="linkAL" d="M280 150C312 150 308 234 340 234"/>
+              <rect class="node" id="nodeS" x="0" y="120" width="100" height="60" rx="4"/>
+              <text class="t" x="50" y="146" text-anchor="middle">Student</text><text class="s" x="50" y="166" text-anchor="middle">asks</text>
+              <rect class="node" id="nodeAI" x="150" y="114" width="130" height="72" rx="4"/>
+              <text class="t" x="215" y="144" text-anchor="middle">AI check</text><text class="s" x="215" y="164" text-anchor="middle">FAQs · duplicates</text>
+              <rect class="node" id="nodeT" x="340" y="34" width="180" height="64" rx="4"/>
+              <text class="t" x="430" y="62" text-anchor="middle">Tutor first</text><text class="s" id="subT" x="430" y="82" text-anchor="middle">standard · 4 waiting</text>
+              <rect class="node urg" id="nodeL" x="340" y="202" width="180" height="64" rx="4"/>
+              <text class="t" x="430" y="230" text-anchor="middle">Lecturer</text><text class="s" id="subL" x="430" y="250" text-anchor="middle">priority · 1 waiting</text>
+            </svg>
+            <div class="result" id="result">Press Send to see where the question is routed.</div>
+          </div>
+        </div>
+        <p class="note rv">Questions, thread counts and queues are example data.</p>
+      </div>
+    </section>
+
+    <!-- 4 roles -->
+    <section class="slide" id="s-roles" data-slug="roles" data-name="Both sides" aria-label="Lecturer and student features">
+      <div class="in">
+        <div class="head">
+          <p class="eyebrow rv">Future situation</p>
+          <h2 class="rv">Less work for lecturers. No guessing for students.</h2>
+        </div>
+        <div class="tabs rv" role="tablist" aria-label="Choose a view">
+          <button class="tab" role="tab" id="tabL" aria-selected="true" aria-controls="paneL">Lecturer view</button>
+          <button class="tab" role="tab" id="tabS" aria-selected="false" aria-controls="paneS">Student view</button>
+        </div>
+        <div class="rolepane rv" id="paneL" role="tabpanel" aria-labelledby="tabL">
+          <div class="panel">
+            <div class="lhead">
+              <span class="lbl" style="margin:0" id="needAct">Priority dashboard</span>
+              <label><input type="checkbox" id="selAll"> Select all</label>
+              <button class="btn primary" id="bulkBtn" disabled>Bulk approve</button>
+            </div>
+            <ul class="lrows" id="lectList"></ul>
+          </div>
+          <div class="panel">
+            <div class="draftmeta"><span class="aitag">AI draft reply</span><b id="draftTitle"></b></div>
+            <label class="sr" for="draftBox">Draft reply</label>
+            <textarea id="draftBox" rows="6"></textarea>
+            <div class="sendrow"><span class="note">Edit the draft, then send.</span><button class="btn primary" id="sendDraft">Send reply</button></div>
+          </div>
+        </div>
+        <div class="rolepane rv" id="paneS" role="tabpanel" aria-labelledby="tabS" hidden>
+          <div class="panel">
+            <span class="lbl">Your request</span>
+            <h3 style="font:800 1.25rem/1.2 var(--f-display);margin-bottom:.9rem">Deadline extension, MC attached</h3>
+            <ol class="stepper" id="stepper"></ol>
+            <p class="note" id="stuLine"></p>
+          </div>
+          <div class="panel">
+            <span class="lbl">Audit trail</span>
+            <ol class="audit" id="audit"></ol>
+            <p class="note" style="margin-top:.8rem">Open the lecturer view, approve or reply to the first request, and watch this page change.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 schedule -->
+    <section class="slide" id="s-schedule" data-slug="schedule" data-name="Schedule" aria-label="Project schedule">
+      <div class="in">
+        <div class="head">
+          <p class="eyebrow rv">Project schedule</p>
+          <h2 class="rv">Three SDLC phases, one final submission on 5 January.</h2>
+        </div>
+        <div class="gantt rv" id="gantt"></div>
+        <div class="panel detail rv" id="detail"></div>
+      </div>
+    </section>
+
+    <!-- 6 budget -->
+    <section class="slide" id="s-budget" data-slug="budget" data-name="Budget" aria-label="Budget">
+      <div class="in">
+        <div class="bud">
+          <div class="head">
+            <p class="eyebrow rv">Estimated budget</p>
+            <div class="big rv" aria-label="RM16,200"><small>RM</small><span id="bigN">16,200</span></div>
+            <p class="lede rv" id="budLine"></p>
+          </div>
+          <div class="rv">
+            <div class="sbar" id="sbar" role="group" aria-label="Budget split"></div>
+            <div class="brows" id="brows"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 thanks -->
+    <section class="slide" id="s-thanks" data-slug="thanks" data-name="Thank you" aria-label="Conclusion">
+      <div class="in">
+        <div class="end">
+          <div class="head">
+            <p class="eyebrow rv">Conclusion</p>
+            <h2 class="rv">Less repetition for lecturers. Faster help for students.</h2>
+            <p class="lede rv">Thank you. We welcome any feedback.</p>
+            <div class="recap rv"><span>Triage first</span><span>AI assist</span><span>Status tracking</span><span>RM16,200</span><span>Final: 5 Jan</span></div>
+            <div class="rv"><button class="btn" id="toStart">Back to start</button></div>
+          </div>
+          <div class="rv">
+            <div class="ticket q" aria-hidden="true">
+              <div class="ticket-top"><span>FSKTM · Q&amp;A DESK</span><span class="live"><i></i>OPEN</span></div>
+              <div class="serving"><small>NOW SERVING</small><b>Q&amp;A</b></div>
+              <div class="ticket-rule"></div>
+              <ul class="ticket-lines"><li><span>Questions</span><em>Open</em></li><li><span>Feedback</span><em>Welcome</em></li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="notes" id="notes" hidden aria-label="Speech script">
+      <header><span>Script · <span id="noteRange"></span> <span id="pace"></span></span><span>Esc to close</span></header>
+      <p id="noteText"></p>
+    </aside>
+  </main>
+
+  <footer class="bar-nav">
+    <button class="nbtn" id="prev" aria-label="Previous slide"><svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg></button>
+    <nav class="steps" id="steps" aria-label="Slides"></nav>
+    <button class="nbtn" id="next" aria-label="Next slide"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></button>
+  </footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var slides=$$('.slide'), N=slides.length, cur=-1, visited={};
+var deck=$('#deck');
+
+/* ---------- script text + pacing (from the speech) ---------- */
+var NOTES=[
+ {r:'0:00 – 0:40',a:0,b:40,t:'Good morning, Dr. Tutut and classmates. We are Group <b class="gn" data-gn></b>, presenting Weekly Progress 3 for our proposed system: AskFSKTM. I’m speaking on behalf of our five-member team.'},
+ {r:'0:00 – 0:40',a:0,b:40,t:'Currently, students contact lecturers through scattered, unstructured channels like email, Teams, and WhatsApp. Because these aren’t categorized, lecturers are bombarded with the exact same repetitive questions. Furthermore, urgent requests—like deadline extensions or MC submissions—get buried without a proper audit trail or status tracking.'},
+ {r:'0:40 – 1:25',a:40,b:85,t:'To solve this, AskFSKTM will act as a smart digital front desk. Before a student even hits send, our system uses AI to suggest matching FAQs or identify duplicate questions, allowing them to join an existing thread instead of creating a new one. Standard queries will route to Tutors first, while urgent requests go straight to a prioritized Lecturer dashboard.'},
+ {r:'0:40 – 1:25',a:40,b:85,t:'We’re also equipping lecturers with AI draft-reply assistants and bulk-approvals, while giving students a transparent status-tracking dashboard.'},
+ {r:'1:25 – 2:00',a:85,b:120,t:'We’ve structured our SDLC into three phases. Phase 1, Domain Investigation, runs until November 12th, focusing on surveys, interviews, and our As-Is Functional Decomposition Diagram. Phase 2, Proposed System Design, runs through December 5th to finalize our DFDs, ERDs, and wireframes. Finally, Phase 3 spans December into early January, where we will build the interactive prototype and conduct usability testing before our final January 5th submission.'},
+ {r:'2:00 – 2:30',a:120,b:150,t:'Our estimated budget totals RM16,200. This covers RM15,000 for standard manpower, RM600 for server costs, and an allocated RM600 for LLM API licenses to power our AI features.'},
+ {r:'2:00 – 2:30',a:120,b:150,t:'Ultimately, AskFSKTM is designed to significantly reduce lecturer workload and get students the help they need faster. Thank you, and we welcome any feedback.'}
+];
+
+/* ---------- group number ---------- */
+var groupEl=$('#groupNo'), GK='askfsktm-group';
+try{var g=localStorage.getItem(GK); if(g) groupEl.textContent=g}catch(e){}
+groupEl.addEventListener('input',function(){try{localStorage.setItem(GK,groupEl.textContent.trim())}catch(e){} renderNotes()});
+groupEl.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();groupEl.blur()}});
+groupEl.addEventListener('paste',function(e){e.preventDefault();var t=(e.clipboardData||window.clipboardData).getData('text');document.execCommand&&document.execCommand('insertText',false,t.replace(/\s+/g,' '))});
+
+/* ---------- nav ---------- */
+var stepsEl=$('#steps');
+slides.forEach(function(s,i){
+  var b=document.createElement('button');b.className='step';b.type='button';
+  b.innerHTML='<span>'+s.dataset.name+'</span>';b.setAttribute('aria-label','Slide '+(i+1)+': '+s.dataset.name);
+  b.addEventListener('click',function(){go(i)});stepsEl.appendChild(b);
+  $$('.rv',s).forEach(function(e,k){e.style.setProperty('--i',k)});
+  s.setAttribute('aria-hidden','true');
+});
+var enter={};
+function go(i){
+  i=Math.max(0,Math.min(N-1,i)); if(i===cur) return;
+  cur=i;
+  slides.forEach(function(s,k){s.classList.toggle('is-active',k===i);s.classList.toggle('is-past',k<i);s.setAttribute('aria-hidden',k===i?'false':'true')});
+  $$('.step',stepsEl).forEach(function(b,k){b.classList.toggle('on',k===i);b.classList.toggle('done',k<i);if(k===i)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+  $('#prev').disabled=i===0;$('#next').disabled=i===N-1;
+  slides[i].scrollTop=0;
+  var slug=slides[i].dataset.slug;
+  if(location.hash!=='#'+slug){try{location.hash=slug}catch(e){}}
+  renderNotes();updatePace();
+  var first=!visited[slug];visited[slug]=true;
+  if(enter[slug]) enter[slug](first);
+}
+$('#prev').addEventListener('click',function(){go(cur-1)});
+$('#next').addEventListener('click',function(){go(cur+1)});
+$('#toStart').addEventListener('click',function(){go(0)});
+function fromHash(){var h=location.hash.replace('#','');var i=slides.findIndex(function(s){return s.dataset.slug===h});if(i>=0)go(i)}
+window.addEventListener('hashchange',fromHash);
+
+document.addEventListener('keydown',function(e){
+  var t=e.target, typing=t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT'||t.isContentEditable);
+  if(typing||e.metaKey||e.ctrlKey||e.altKey) return;
+  var k=e.key;
+  if(k==='ArrowRight'||k==='PageDown'||(k===' '&&!(t&&t.tagName==='BUTTON'))){e.preventDefault();go(cur+1)}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();go(cur-1)}
+  else if(k==='Home'){go(0)} else if(k==='End'){go(N-1)}
+  else if(/^[1-7]$/.test(k)){go(+k-1)}
+  else if(k==='n'||k==='N'){toggleNotes()}
+  else if(k==='t'||k==='T'){toggleTimer()}
+  else if(k==='f'||k==='F'){toggleFs()}
+  else if(k==='Escape'){setNotes(false)}
+});
+var sx=0,sy=0;
+deck.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+deck.addEventListener('touchend',function(e){
+  var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>80&&Math.abs(dx)>Math.abs(dy)*1.8&&!(e.target.closest&&e.target.closest('textarea,input'))) go(cur+(dx<0?1:-1));
+},{passive:true});
+
+/* ---------- notes ---------- */
+var notesEl=$('#notes');
+function renderNotes(){
+  if(cur<0) return;
+  var n=NOTES[cur];$('#noteRange').textContent=n.r;$('#noteText').innerHTML=n.t;
+  var gn=$('[data-gn]',notesEl);if(gn){var v=groupEl.textContent.trim();gn.textContent=v||'[number]'}
+}
+function setNotes(on){notesEl.hidden=!on;$('#notesBtn').setAttribute('aria-pressed',on?'true':'false')}
+function toggleNotes(){setNotes(notesEl.hidden)}
+$('#notesBtn').addEventListener('click',toggleNotes);
+
+/* ---------- timer ---------- */
+var tm={on:false,t0:0,acc:0};
+function ms(){return tm.acc+(tm.on?performance.now()-tm.t0:0)}
+function fmt(x){var s=Math.floor(x/1000);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
+function updatePace(){
+  var el=$('#pace'),btn=$('#timerBtn');
+  var sec=ms()/1000;$('#tm').textContent=fmt(ms());
+  btn.classList.toggle('over',sec>150);
+  if(!tm.on&&tm.acc===0){el.textContent='';return}
+  var n=NOTES[cur];if(!n){el.textContent='';return}
+  var s=n.a,e=n.b;
+  if(sec>e) el.textContent='· behind by '+fmt((sec-e)*1000);
+  else if(sec<s-5) el.textContent='· ahead by '+fmt((s-sec)*1000);
+  else el.textContent='· on pace';
+}
+function syncTimer(){$('#timerBtn').setAttribute('aria-pressed',tm.on?'true':'false');$('#tmReset').hidden=!(tm.acc>0||tm.on);updatePace()}
+function toggleTimer(){if(tm.on){tm.acc=ms();tm.on=false}else{tm.t0=performance.now();tm.on=true}syncTimer()}
+$('#timerBtn').addEventListener('click',toggleTimer);
+$('#tmReset').addEventListener('click',function(){tm.on=false;tm.acc=0;syncTimer()});
+setInterval(function(){if(tm.on)updatePace()},250);
+
+/* ---------- theme + fullscreen ---------- */
+var mq=matchMedia('(prefers-color-scheme: dark)');
+$('#themeBtn').addEventListener('click',function(){var r=document.documentElement;var c=r.dataset.theme||(mq.matches?'dark':'light');r.dataset.theme=c==='dark'?'light':'dark'});
+function toggleFs(){
+  try{
+    if(document.fullscreenElement){document.exitFullscreen()}
+    else if(document.documentElement.requestFullscreen){var p=document.documentElement.requestFullscreen();if(p&&p.catch)p.catch(function(){})}
+  }catch(e){}
+}
+if(!document.fullscreenEnabled) $('#fsBtn').hidden=true;
+$('#fsBtn').addEventListener('click',toggleFs);
+
+/* ---------- 1: ticket number ---------- */
+(function(){
+  var el=$('#tkNum'),n=41;
+  if(reduce) return;
+  setInterval(function(){n++;el.textContent='A-0'+n;el.classList.remove('flip');void el.offsetWidth;el.classList.add('flip')},2600);
+})();
+
+/* ---------- 2: message flood ---------- */
+var fl={timers:[],seen:{},total:0,rep:0,urg:0};
+var NAMES=['Aina','Daniel','Mei Ling','Raj','Farah','Wei Jie','Siti','Jun Hao','Hakim','Priya'];
+var QS=['When is the assignment deadline?','Where are the lecture slides?','Is attendance compulsory?','How do I submit the report?','What is the marking rubric?','Can I consult you today?'];
+var CH=['email','teams','whatsapp'];
+function flCounters(){$('#cMsg').textContent=fl.total;$('#cRep').textContent=fl.rep;$('#cUrg').textContent=fl.urg;$('#cUrgBox').classList.toggle('hot',fl.urg>0)}
+function flClear(){fl.timers.forEach(clearTimeout);fl.timers=[];fl.seen={};fl.total=0;fl.rep=0;fl.urg=0;$$('.feed').forEach(function(f){f.innerHTML=''});flCounters()}
+function flAdd(ch,text,who,urgent){
+  var feed=$('#feed-'+ch),li=document.createElement('li');
+  li.className='msg'+(urgent?' urgent':'');
+  li.innerHTML='<b>'+who+'</b><span>'+text+'</span>'+(urgent?'<i class="tag">Urgent</i>':'');
+  feed.insertBefore(li,feed.firstChild);
+  while(feed.children.length>14) feed.removeChild(feed.lastChild);
+  fl.total++;
+  if(urgent){fl.urg++}else{if(fl.seen[text]) fl.rep++; else fl.seen[text]=1}
+  flCounters();return li;
+}
+function flRun(){
+  flClear();var urgLi=null;
+  for(var k=0;k<26;k++){(function(k){
+    var step=function(){
+      if(k===3){urgLi=flAdd('email','Extension request, MC attached','Hakim',true)}
+      else{flAdd(CH[(k*5+(k>>1))%3],QS[(k*7+(k>>2))%QS.length],NAMES[(k*3)%NAMES.length],false)}
+      if(k===10&&urgLi){urgLi.classList.add('buried');urgLi.querySelector('.tag').textContent='Buried · no status'}
+    };
+    if(reduce) step(); else fl.timers.push(setTimeout(step,300+k*330));
+  })(k)}
+}
+$('#replayFlood').addEventListener('click',flRun);
+enter.today=function(first){if(first) flRun()};
+
+/* ---------- 3: triage demo ---------- */
+var STOP={};'the a an is are i my me we you do does how can to of for and in on where when what get it be this that at with'.split(' ').forEach(function(w){STOP[w]=1});
+function tok(s){var o={};s.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).forEach(function(w){if(!w||STOP[w])return;if(w.length>3)w=w.replace(/s$/,'');o[w]=1});return o}
+var FAQ=[
+ {q:'When is the assignment deadline?',n:14},
+ {q:'How do I submit my MC for a missed assessment?',n:9},
+ {q:'Where can I find the lecture slides?',n:21},
+ {q:'Can I get a deadline extension?',n:6},
+ {q:'How is the final project graded?',n:11},
+ {q:'When are the lecturer consultation hours?',n:8}
+];
+FAQ.forEach(function(f){f.t=tok(f.q)});
+var URG=/(extension|extend|\bmc\b|medical|sick|illness|urgent|appeal|hospital|emergency|clash)/i;
+var qEl=$('#q'),joined=-1,ticket=418,cntT=4,cntL=1;
+function renderSuggest(){
+  var v=qEl.value.trim(),box=$('#suggest');
+  $('#urgentFlag').hidden=!URG.test(v);
+  if(!v){box.innerHTML='<p class="hint">Start typing. The AI looks for matching FAQs and open threads before anything is sent.</p>';return}
+  var t=tok(v);
+  var sc=FAQ.map(function(f,i){var inter=0,a=0,b=0,w;for(w in t){a++;if(f.t[w])inter++}for(w in f.t)b++;var u=a+b-inter;return{i:i,f:f,s:u?inter/u:0}})
+    .filter(function(x){return x.s>=.2}).sort(function(a,b){return b.s-a.s}).slice(0,2);
+  if(!sc.length){box.innerHTML='<p class="hint">No similar question yet. This will open a new thread.</p>';return}
+  box.innerHTML=sc.map(function(x){
+    return '<div class="sg"><div><b>'+x.f.q+'</b><small>'+x.f.n+' students asked · '+(x.s>=.5?'Likely duplicate':'Related')+'</small></div><button class="btn'+(joined===x.i?' on':'')+'" data-j="'+x.i+'">'+(joined===x.i?'Joined':'Join thread')+'</button></div>';
+  }).join('');
+}
+$('#suggest').addEventListener('click',function(e){var b=e.target.closest('[data-j]');if(!b)return;var j=+b.dataset.j;joined=joined===j?-1:j;renderSuggest()});
+qEl.addEventListener('input',function(){joined=-1;renderSuggest();clearPath()});
+$('#chips').addEventListener('click',function(e){var c=e.target.closest('.chip');if(!c)return;qEl.value=c.dataset.t;joined=-1;renderSuggest();clearPath()});
+function clearPath(){['linkSA','linkAT','linkAL','nodeAI','nodeT','nodeL','nodeS'].forEach(function(id){var el=$('#'+id);el.classList.remove('on')});$('#linkAL').classList.remove('urg');var r=$('#result');r.className='result';r.textContent='Press Send to see where the question is routed.'}
+$('#sendQ').addEventListener('click',function(){
+  var v=qEl.value.trim(),r=$('#result');
+  if(!v){r.className='result';r.textContent='Type a question first.';return}
+  clearPath();
+  $('#linkSA').classList.add('on');$('#nodeS').classList.add('on');$('#nodeAI').classList.add('on');
+  if(joined>=0){
+    r.className='result ok';r.innerHTML='<b>Joined thread</b> The question was matched to an open thread. No new question reached the lecturer.';return;
+  }
+  var urgent=URG.test(v);ticket++;
+  if(urgent){
+    cntL++;$('#subL').textContent='priority · '+cntL+' waiting';
+    $('#linkAL').classList.add('on','urg');$('#nodeL').classList.add('on');
+    r.className='result ok urg';r.innerHTML='<b>Ticket Q-'+ticket+'</b> goes straight to the lecturer’s priority dashboard. Status: Received.';
+  }else{
+    cntT++;$('#subT').textContent='standard · '+cntT+' waiting';
+    $('#linkAT').classList.add('on');$('#nodeT').classList.add('on');
+    r.className='result ok';r.innerHTML='<b>Ticket Q-'+ticket+'</b> goes to a tutor first. Status: Received.';
+  }
+});
+renderSuggest();
+
+/* ---------- 4: lecturer / student ---------- */
+var reqs=[
+ {id:1,title:'Deadline extension, MC attached',who:'Aina Sofea · Assignment 2',pri:'urgent',status:'pending',draft:'Hi Aina, thank you for sending your MC. I have approved a 3-day extension for Assignment 2. Please submit through the portal once it is ready. The system keeps a record of this approval. Take care and get well soon.'},
+ {id:2,title:'MC for a missed quiz',who:'Daniel Lim · Quiz 2',pri:'urgent',status:'pending',draft:'Hi Daniel, your MC for the missed quiz is received and verified. You may sit the make-up quiz next week. The details will appear in your request status.'},
+ {id:4,title:'Extension, family emergency',who:'Raj Kumar · Assignment 2',pri:'urgent',status:'pending',draft:'Hi Raj, I am sorry to hear about your family emergency. I have approved an extension for Assignment 2. Please add a short note with your new submission.'},
+ {id:3,title:'Two final exams on the same day',who:'Farah Aziz · Exam timetable',pri:'high',status:'pending',draft:'Hi Farah, I have noted the clash between your two final exams. Please attach both timetable pages so the office can arrange an alternative slot.'}
+];
+var sel=1,checked={},logs=[],tw=null;
+function byId(id){return reqs.filter(function(r){return r.id===id})[0]}
+function renderLect(){
+  var ord={urgent:0,high:1,normal:2};
+  var list=reqs.slice().sort(function(a,b){return ord[a.pri]-ord[b.pri]||a.id-b.id});
+  $('#lectList').innerHTML=list.map(function(r){
+    var done=r.status!=='pending';
+    return '<li class="lrow'+(r.id===sel?' sel':'')+(done?' done':'')+'" data-id="'+r.id+'"><input type="checkbox" data-c="'+r.id+'" aria-label="Select '+r.title+'"'+(checked[r.id]?' checked':'')+(done?' disabled':'')+'><div class="lt"><b>'+r.title+'</b><small>'+r.who+'</small></div><span class="pill '+r.pri+'">'+r.pri+'</span><span class="pill st st-'+r.status+'">'+r.status+'</span></li>';
+  }).join('');
+  var pend=reqs.filter(function(r){return r.status==='pending'}).length;
+  $('#needAct').textContent='Priority dashboard · '+pend+' need action';
+  var n=Object.keys(checked).filter(function(k){return checked[k]}).length;
+  var bb=$('#bulkBtn');bb.disabled=n===0;bb.textContent=n?'Bulk approve ('+n+')':'Bulk approve';
+  $('#selAll').checked=pend>0&&n===pend;
+}
+function renderDraft(type){
+  var r=byId(sel);$('#draftTitle').textContent=r.title;
+  var box=$('#draftBox'),btn=$('#sendDraft');
+  clearInterval(tw);
+  btn.disabled=r.status!=='pending';btn.textContent=r.status==='pending'?'Send reply':(r.status==='approved'?'Approved':'Reply sent');
+  if(type&&r.status==='pending'&&!reduce){
+    box.value='';var i=0;tw=setInterval(function(){i+=2;box.value=r.draft.slice(0,i);if(i>=r.draft.length)clearInterval(tw)},16);
+  }else box.value=r.draft;
+}
+$('#draftBox').addEventListener('input',function(){clearInterval(tw)});
+$('#lectList').addEventListener('click',function(e){
+  var cb=e.target.closest('input[data-c]');
+  if(cb){checked[cb.dataset.c]=cb.checked;renderLect();return}
+  var li=e.target.closest('.lrow');if(!li)return;
+  sel=+li.dataset.id;renderLect();renderDraft(true);
+});
+$('#selAll').addEventListener('change',function(e){
+  reqs.forEach(function(r){checked[r.id]=e.target.checked&&r.status==='pending'});renderLect();
+});
+$('#bulkBtn').addEventListener('click',function(){
+  reqs.forEach(function(r){if(checked[r.id]&&r.status==='pending'){r.status='approved';if(r.id===1)logs.push('Approved by the lecturer in a bulk approval')}});
+  checked={};renderLect();renderDraft(false);renderStudent();
+});
+$('#sendDraft').addEventListener('click',function(){
+  var r=byId(sel);if(r.status!=='pending')return;
+  r.status='replied';if(r.id===1)logs.push('Reply sent from the AI draft');
+  delete checked[r.id];renderLect();renderDraft(false);renderStudent();
+});
+function renderStudent(){
+  var r=byId(1),done=r.status!=='pending';
+  var labels=['Submitted','AI triaged','With lecturer',done?(r.status==='approved'?'Approved':'Replied'):'Decision'];
+  var st=['done','done',done?'done':'now',done?'done':''];
+  $('#stepper').innerHTML=labels.map(function(l,i){return '<li class="'+st[i]+'">'+l+'</li>'}).join('');
+  $('#stuLine').textContent=done?(r.status==='approved'?'Approved. The status updated here, so there is no need to chase anyone.':'The lecturer replied. The answer is attached to this request.'):'Waiting for the lecturer. It was marked urgent, so it sits at the top of their dashboard.';
+  var base=['Submitted through AskFSKTM','AI check: no duplicate found, marked urgent','Placed on the lecturer’s priority dashboard'];
+  $('#audit').innerHTML=base.concat(logs).map(function(l){return '<li>'+l+'</li>'}).join('');
+}
+function setTab(which){
+  var L=which==='L';
+  $('#tabL').setAttribute('aria-selected',L?'true':'false');$('#tabS').setAttribute('aria-selected',L?'false':'true');
+  $('#paneL').hidden=!L;$('#paneS').hidden=L;
+  if(L) renderDraft(false);
+}
+$('#tabL').addEventListener('click',function(){setTab('L')});
+$('#tabS').addEventListener('click',function(){setTab('S')});
+renderLect();renderDraft(false);renderStudent();
+enter.roles=function(first){if(first&&$('#paneL').hidden===false) renderDraft(true)};
+
+/* ---------- 5: schedule ---------- */
+var D=function(y,m,d){return Date.UTC(y,m-1,d)}, DAY=86400000;
+var R0=D(2026,10,26), R1=D(2027,1,9);
+var PH=[
+ {k:1,tag:'Phase 1',name:'Domain Investigation',a:R0,b:D(2026,11,12),bar:'Until 12 Nov',when:'Runs until 12 November',cls:'var(--accent)',on:'var(--on-accent)',fade:true,items:['Surveys','Interviews','As-Is Functional Decomposition Diagram']},
+ {k:2,tag:'Phase 2',name:'Proposed System Design',a:D(2026,11,13),b:D(2026,12,5),bar:'Through 5 Dec',when:'13 November to 5 December',cls:'var(--good)',on:'var(--on-good)',items:['DFDs','ERDs','Wireframes']},
+ {k:3,tag:'Phase 3',name:'Prototype and Usability Testing',a:D(2026,12,6),b:D(2027,1,5),bar:'Dec to early Jan',when:'December into early January',cls:'var(--plum)',on:'var(--on-plum)',items:['Interactive prototype','Usability testing','Final submission, 5 January']}
+];
+function pos(t){return (t-R0)/(R1-R0)*100}
+var td=new Date(),today=D(td.getFullYear(),td.getMonth()+1,td.getDate());
+var selPh=1;
+if(today>=PH[1].a&&today<=PH[1].b+DAY) selPh=2; else if(today>=PH[2].a) selPh=3;
+function renderGantt(){
+  var h='<div class="axis">';
+  [[D(2026,11,1),'Nov'],[D(2026,12,1),'Dec'],[D(2027,1,1),'Jan']].forEach(function(m){h+='<span style="left:'+pos(m[0])+'%">'+m[1]+'</span>'});
+  h+='</div><div class="grid">';
+  [D(2026,11,1),D(2026,12,1),D(2027,1,1)].forEach(function(m){h+='<i style="left:'+pos(m)+'%"></i>'});
+  h+='</div>';
+  PH.forEach(function(p){
+    var l=pos(p.a),w=pos(p.b+DAY)-l;
+    h+='<div class="prow"><div class="cap">'+p.name+'<small>'+p.tag+'</small></div><div class="track"><button class="bar'+(p.fade?' fade':'')+(p.k===selPh?' sel':'')+'" data-k="'+p.k+'" style="--bar:'+p.cls+';--on-bar:'+p.on+';left:'+l+'%;width:'+w+'%" aria-pressed="'+(p.k===selPh)+'" aria-label="'+p.tag+': '+p.name+'">'+p.bar+'</button></div></div>';
+  });
+  var fp=pos(D(2027,1,5)+DAY/2);
+  h+='<div class="mrow"><span class="dia" style="left:'+fp+'%"></span><span class="mlab" style="right:calc('+(100-fp)+'% + .9rem)">Final submission · 5 Jan</span></div>';
+  if(today>=R0&&today<=R1) h+='<div class="today" style="left:'+pos(today+DAY/2)+'%"><b>Today</b></div>';
+  $('#gantt').innerHTML=h;
+  var p=PH[selPh-1];
+  $('#detail').innerHTML='<div><span class="lbl">'+p.tag+'</span><h3>'+p.name+'</h3><p class="when">'+p.when+'</p></div><div><span class="lbl">What we deliver</span><ul class="dels">'+p.items.map(function(i){return '<li>'+i+'</li>'}).join('')+'</ul></div>';
+}
+$('#gantt').addEventListener('click',function(e){var b=e.target.closest('.bar');if(!b)return;selPh=+b.dataset.k;renderGantt()});
+renderGantt();
+
+/* ---------- 6: budget ---------- */
+var BUD=[
+ {n:'Standard manpower',v:15000,c:'var(--accent)',d:'Standard manpower for the five-member team.'},
+ {n:'Server costs',v:600,c:'var(--plum)',d:'Server costs to run the system.'},
+ {n:'LLM API licenses',v:600,c:'var(--good)',d:'Powers the AI features: matching FAQs, spotting duplicates and drafting replies.'}
+];
+var TOTAL=BUD.reduce(function(a,b){return a+b.v},0), bsel=0;
+function money(n){return n.toLocaleString('en-US')}
+function pct(v){return (Math.round(v/TOTAL*1000)/10).toFixed(1)}
+function renderBud(){
+  $('#sbar').innerHTML=BUD.map(function(b,i){return '<button class="seg'+(i===bsel?' sel':'')+'" data-i="'+i+'" style="--w:'+(b.v/TOTAL*100)+';--c:'+b.c+'" aria-label="'+b.n+', RM'+money(b.v)+'"></button>'}).join('');
+  $('#brows').innerHTML=BUD.map(function(b,i){return '<button class="brow'+(i===bsel?' sel':'')+'" data-i="'+i+'" style="--c:'+b.c+'"><i></i><b>'+b.n+'</b><span class="amt">RM'+money(b.v)+' · '+pct(b.v)+'%</span><small>'+b.d+'</small></button>'}).join('');
+  var b=BUD[bsel];
+  $('#budLine').textContent=b.n+' is RM'+money(b.v)+', '+pct(b.v)+'% of the total.';
+}
+function pickBud(e){var t=e.target.closest('[data-i]');if(!t)return;bsel=+t.dataset.i;renderBud()}
+$('#sbar').addEventListener('click',pickBud);$('#brows').addEventListener('click',pickBud);
+renderBud();
+enter.budget=function(first){
+  var el=$('#bigN');if(reduce){el.textContent=money(TOTAL);return}
+  var t0=performance.now();(function f(now){var p=Math.min(1,(now-t0)/900),e=1-Math.pow(1-p,3);el.textContent=money(Math.round(TOTAL*e));if(p<1)requestAnimationFrame(f)})(t0);
+};
+
+/* ---------- start ---------- */
+var h0=location.hash.replace('#',''),i0=slides.findIndex(function(s){return s.dataset.slug===h0});
+go(i0>=0?i0:0);
+})();
+</script>
+
+</body></html>
