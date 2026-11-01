@@ -96,6 +96,12 @@ h2{font:800 clamp(1.55rem,3vw,2.7rem)/1.05 var(--f-display);letter-spacing:-.02e
 .logo{font:800 clamp(3.2rem,10.5vw,9rem)/.9 var(--f-display);letter-spacing:-.045em}
 .logo span{color:var(--accent)}
 .intro-copy{display:grid;gap:1.1rem}
+.crew{margin-top:.4rem}
+.crew .lbl{margin-bottom:.6rem}
+.crew ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9.2rem,1fr));gap:.5rem}
+.crew li{background:var(--surface);border:1px solid var(--line);border-radius:.25rem;padding:.6rem .75rem;display:grid;gap:.15rem;min-width:0}
+.crew li b{font:700 1.05rem/1.15 var(--f-display)}
+.crew li span{font:500 .64rem/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .meta{display:flex;flex-wrap:wrap;gap:.8rem 2rem;margin:.4rem 0 0}
 .meta div{display:grid;gap:.15rem}
 .meta dt{font:500 .68rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -322,11 +328,16 @@ textarea:focus{border-color:var(--accent);outline:none}
             <p class="eyebrow rv">Weekly Progress 3 · Proposed system</p>
             <h1 class="logo rv"><span>Ask</span>FSKTM</h1>
             <p class="lede rv">A smart digital front desk where students get answers faster and lecturers stop answering the same question twice.</p>
-            <dl class="meta rv">
-              <div><dt>Presenting to</dt><dd>Dr. Tutut</dd></div>
-              <div><dt>Group</dt><dd><span class="edit" id="groupNo" contenteditable="true" spellcheck="false" role="textbox" aria-label="Group number, click to edit" data-ph="No."></span></dd></div>
-              <div><dt>Team</dt><dd>5 members</dd></div>
-            </dl>
+            <div class="crew rv">
+              <span class="lbl">Project team · 5 members</span>
+              <ul>
+                <li><b>Irwina</b><span>Project manager</span></li>
+                <li><b>Jee Syuen</b><span>System analyst</span></li>
+                <li><b>Yong She</b><span>Programmer</span></li>
+                <li><b>Xuan Pei</b><span>Network engineer</span></li>
+                <li><b>Yong Hung</b><span>UI/UX designer</span></li>
+              </ul>
+            </div>
           </div>
           <div class="rv">
             <div class="ticket" aria-hidden="true">
@@ -544,11 +555,7 @@ var NOTES=[
 ];
 
 /* ---------- group number ---------- */
-var groupEl=$('#groupNo'), GK='askfsktm-group';
-try{var g=localStorage.getItem(GK); if(g) groupEl.textContent=g}catch(e){}
-groupEl.addEventListener('input',function(){try{localStorage.setItem(GK,groupEl.textContent.trim())}catch(e){} renderNotes()});
-groupEl.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();groupEl.blur()}});
-groupEl.addEventListener('paste',function(e){e.preventDefault();var t=(e.clipboardData||window.clipboardData).getData('text');document.execCommand&&document.execCommand('insertText',false,t.replace(/\s+/g,' '))});
+var groupEl=null;
 
 /* ---------- nav ---------- */
 var stepsEl=$('#steps');
@@ -604,7 +611,7 @@ var notesEl=$('#notes');
 function renderNotes(){
   if(cur<0) return;
   var n=NOTES[cur];$('#noteRange').textContent=n.r;$('#noteText').innerHTML=n.t;
-  var gn=$('[data-gn]',notesEl);if(gn){var v=groupEl.textContent.trim();gn.textContent=v||'[number]'}
+  var gn=$('[data-gn]',notesEl);if(gn){gn.textContent='[Insert Group Number]'}
 }
 function setNotes(on){notesEl.hidden=!on;$('#notesBtn').setAttribute('aria-pressed',on?'true':'false')}
 function toggleNotes(){setNotes(notesEl.hidden)}
